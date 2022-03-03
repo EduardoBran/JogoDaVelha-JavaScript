@@ -1,7 +1,7 @@
 let x = document.querySelector(".x");
 let o = document.querySelector(".o");
 let boxes = document.querySelectorAll(".box");
-let buttons = document.querySelectorAll("buttons-container button");
+let buttons = document.querySelectorAll("#buttons-container button");
 let messageContainer = document.querySelector("#message");
 let messageText = document.querySelector(("#message p"));
 let secondPlayer;
@@ -19,7 +19,7 @@ for (let i = 0; i < boxes.length; i++) {
         //verificando quem vai jogar
         let elemento = checkElemento(player1, player2)
 
-        //verifica se ja te 'x' ou 'o'
+        //verifica se ja tem 'x' ou 'o'
         if(this.childNodes.length == 0){ 
 
             let cloneElemento = elemento.cloneNode(true); //precisa clonar para podermos aproveita-lo depois
@@ -28,6 +28,13 @@ for (let i = 0; i < boxes.length; i++) {
             //computar jogada
             if(player1 == player2){
                 player1++;
+
+                if(secondPlayer == 'btnIAPlayer'){
+
+                    //função para executar a jogada
+                    computerPlay();
+                    player2++;
+                }
             }
             else{
                 player2++;
@@ -37,6 +44,29 @@ for (let i = 0; i < boxes.length; i++) {
         }
     });    
 }
+
+//evento para saber se é 2 players ou IA
+for (let i = 0; i < buttons.length; i++) { 
+
+    buttons[i].addEventListener("click", function() { //pegando cada botão e adicionando ao evento listener
+        
+        secondPlayer = this.getAttribute("id"); //pegando o ID do botão clicado
+
+        for (let j = 0; j < buttons.length; j++) { //escondendo os botões
+            buttons[j].style.display = 'none';            
+        }
+
+        setTimeout(function() { //aparece o tabuleiro após o click do botão
+
+            let container = document.querySelector("#container");
+            container.classList.remove("hide");
+
+        }, 500);
+
+    });
+    
+}
+
 //ver quem vai jogar
 function checkElemento(player1, player2){
     
@@ -231,6 +261,11 @@ function declareWinner(winner) {
         scoreBoardX.textContent = parseInt(scoreBoardX.textContent) + 1;
         msg = "O jogador 1 venceu!";
     }
+    else if(winner == 'o' && secondPlayer == 'btnIAPlayer'){
+
+        scoreBoardY.textContent = parseInt(scoreBoardY.textContent) + 1;
+        msg = "A IA venceu!";
+    }
     else if(winner == 'o'){
 
         scoreBoardY.textContent = parseInt(scoreBoardY.textContent) + 1;
@@ -260,3 +295,31 @@ function declareWinner(winner) {
         boxesToRemove[i].parentNode.removeChild(boxesToRemove[i]);        
     }
 }
+
+//executando a lógica da jogada do computador
+function computerPlay() {
+
+    let cloneO = o.cloneNode(true);
+    contador = 0;
+    preenchido = 0;
+
+    for (let i = 0; i < boxes.length; i++) {
+        
+        let randomNumber = Math.floor(Math.random() * 5); //numero aleatório de 0 a 5 
+        
+        // só preenche se o filho estiver vazio
+        if(boxes[i].childNodes[0] == undefined) { //verificar se ja tem alguma box preenchida p/ nao preencher de novo
+            if(randomNumber <= 1) { //condição para aumentar a aleatoriedade
+                boxes[i].appendChild(cloneO);
+                contador++;
+                break;
+            }
+        }
+        else{
+            preenchido++; //checagem para ver quantas estão preenchidas
+        }
+    }
+    if(contador == 0 && preenchido < 9){
+        computerPlay(); //chamando a função novamente (recursivamente)
+    }
+};
